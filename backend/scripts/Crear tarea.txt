@@ -1,0 +1,17 @@
+Abre Programador de tareas de Windows (taskschd.msc).
+
+Click en Crear tarea básica.
+
+Nombre: Backup Consultorio +sana.
+
+Desencadenador: Diariamente a las 3:00 AM.
+
+Acción: Iniciar un programa → selecciona backend\scripts\backup.bat.
+
+Marca "Ejecutar aunque el usuario no haya iniciado sesión" si quieres.
+
+Guarda.
+
+Al final añade
+
+0 3 * * * cd /ruta/al/backend && node scripts/backup.js >> logs/backup.log 2>&1

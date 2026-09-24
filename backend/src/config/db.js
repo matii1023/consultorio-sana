@@ -22,7 +22,12 @@ const poolConfig = process.env.DATABASE_URL
 
 console.log('🔍 DATABASE_URL configurada:', !!process.env.DATABASE_URL);
 
-const pool = new Pool(poolConfig);
+const pool = new Pool({
+  ...poolConfig,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {

@@ -1,17 +1,28 @@
 const { Pool } = require('pg');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-const pool = new Pool({
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  ssl: process.env.NODE_ENV === 'production' 
-    ? { rejectUnauthorized: false } 
-    : false,
-});
+// NO forzar carga de .env aquí.
+// En Render las variables vienen del sistema.
+// En local, server.js ya llama a require('dotenv').config().
+
+const poolConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    }
+  : {
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      database: process.env.DB_NAME,
+    };
+
+console.log('🔍 DATABASE_URL configurada:', !!process.env.DATABASE_URL);
+
+const pool = new Pool(poolConfig);
 
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {

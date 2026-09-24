@@ -3,13 +3,12 @@ import Input from '../common/Input';
 import Button from '../common/Button';
 
 const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = false }) => {
-  const [mode, setMode] = useState('existing'); // 'existing' | 'new'
+  const [mode, setMode] = useState('existing');
   const [patientSearch, setPatientSearch] = useState('');
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Datos para nuevo paciente
   const [newPatient, setNewPatient] = useState({
     document_id: '',
     first_name: '',
@@ -22,7 +21,6 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
     emergency_contact: '',
   });
 
-  // Datos de la cita
   const [form, setForm] = useState({
     doctor_id: '',
     date_time: '',
@@ -34,7 +32,6 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
   const [error, setError] = useState('');
   const [doctorSpecialty, setDoctorSpecialty] = useState('');
 
-  // Actualizar especialidad del doctor seleccionado
   useEffect(() => {
     if (form.doctor_id) {
       const doctor = doctors.find((d) => d.id === form.doctor_id);
@@ -44,7 +41,6 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
     }
   }, [form.doctor_id, doctors]);
 
-  // Filtrar pacientes según búsqueda
   useEffect(() => {
     if (!patientSearch || patientSearch.length < 2) {
       setFilteredPatients([]);
@@ -93,13 +89,11 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
     e.preventDefault();
     setError('');
 
-    // Validar cita
     if (!form.doctor_id || !form.date_time) {
       setError('Médico y fecha/hora son obligatorios');
       return;
     }
 
-    // Validar paciente según modo
     if (mode === 'existing') {
       if (!selectedPatient) {
         setError('Debes seleccionar un paciente');
@@ -134,11 +128,10 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* ===== SECCIÓN PACIENTE ===== */}
+      {/* SECCIÓN PACIENTE */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <label className="label mb-0">Paciente *</label>
-          {/* Toggle */}
           <div className="inline-flex rounded-xl bg-sana-50 p-1">
             <button
               type="button"
@@ -298,13 +291,18 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
                 value={newPatient.birth_date}
                 onChange={handleNewPatientChange}
               />
-              <Input
-                label="Teléfono (WhatsApp) *"
-                name="phone"
-                value={newPatient.phone}
-                onChange={handleNewPatientChange}
-                placeholder="+5491123456789"
-              />
+              <div>
+                <Input
+                  label="Teléfono (WhatsApp) *"
+                  name="phone"
+                  value={newPatient.phone}
+                  onChange={handleNewPatientChange}
+                  placeholder="2634589236"
+                />
+                <p className="text-xs text-sana-400 -mt-2 mb-4">
+                  💡 Podés escribir el número sin el +54 9.
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -321,7 +319,7 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
                 name="emergency_contact"
                 value={newPatient.emergency_contact}
                 onChange={handleNewPatientChange}
-                placeholder="María +5491123456789"
+                placeholder="María 2634589236"
               />
             </div>
 
@@ -343,13 +341,12 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
         )}
       </div>
 
-      {/* ===== SECCIÓN CITA ===== */}
+      {/* SECCIÓN CITA */}
       <div className="pt-2 border-t border-sana-100">
         <p className="text-xs text-sana-500 uppercase tracking-wide mb-3">
           Datos de la cita
         </p>
 
-        {/* Doctor */}
         <div className="mb-4">
           <label className="label">Médico *</label>
           <select
@@ -373,7 +370,6 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
           )}
         </div>
 
-        {/* Fecha y duración */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <Input
@@ -401,7 +397,6 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
           </div>
         </div>
 
-        {/* Motivo */}
         <Input
           label="Motivo de consulta"
           name="reason"
@@ -410,7 +405,6 @@ const AppointmentForm = ({ doctors, patients, onSubmit, onCancel, loading = fals
           placeholder="Ej: Dolor de cabeza persistente"
         />
 
-        {/* Notas */}
         <div>
           <label className="label">Notas internas</label>
           <textarea

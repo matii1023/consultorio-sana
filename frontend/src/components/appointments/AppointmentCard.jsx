@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Badge from '../common/Badge';
 
 const AppointmentCard = ({
@@ -5,7 +6,12 @@ const AppointmentCard = ({
   onStatusChange,
   onRegisterConsultation,
   onPrintReceipt,
+  onSendWhatsApp,
+  onSendReminder,
+  onReschedule,
 }) => {
+  const [sending, setSending] = useState(false);
+
   const time = new Date(appointment.date_time).toLocaleTimeString('es-AR', {
     hour: '2-digit',
     minute: '2-digit',
@@ -27,11 +33,21 @@ const AppointmentCard = ({
 
   const actions = statusActions[appointment.status] || [];
   const canRegister = appointment.status === 'IN_PROGRESS' || appointment.status === 'COMPLETED';
+  const canReschedule = ['PENDING', 'CONFIRMED'].includes(appointment.status);
+
+  const handleWhatsApp = async () => {
+    setSending(true);
+    try { await onSendWhatsApp?.(appointment); } finally { setSending(false); }
+  };
+
+  const handleReminder = async () => {
+    setSending(true);
+    try { await onSendReminder?.(appointment); } finally { setSending(false); }
+  };
 
   return (
     <div className="card border border-sana-100 hover:shadow-soft transition-all">
       <div className="flex items-start gap-4">
-        {/* Hora */}
         <div className="flex flex-col items-center justify-center bg-sana-50 
                         rounded-xl px-3 py-2 min-w-[70px]">
           <span className="text-lg font-semibold text-sana-700">{time}</span>
@@ -40,7 +56,6 @@ const AppointmentCard = ({
           </span>
         </div>
 
-        {/* Info principal */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -71,7 +86,6 @@ const AppointmentCard = ({
         </div>
       </div>
 
-      {/* Acciones */}
       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-sana-100">
         {actions.map((action) => (
           <button
@@ -84,6 +98,44 @@ const AppointmentCard = ({
           </button>
         ))}
 
+        {onReschedule && canReschedule && (
+          <button
+            onClick={() => onReschedule(appointment)}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg 
+                       text-blue-600 hover:bg-blue-50 transition-colors
+                       border border-blue-200"
+            title="Reprogramar cita"
+          >
+            🔄 Reprogramar
+          </button>
+        )}
+
+        {onSendWhatsApp && (
+          <button
+            onClick={handleWhatsApp}
+            disabled={sending}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg 
+                       text-emerald-600 hover:bg-emerald-50 transition-colors
+                       border border-emerald-200 disabled:opacity-50"
+            title="Enviar comprobante por WhatsApp"
+          >
+            {sending ? '⏳' : '💬'} Turno
+          </button>
+        )}
+
+        {onSendReminder && appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED' && (
+          <button
+            onClick={handleReminder}
+            disabled={sending}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg 
+                       text-blue-600 hover:bg-blue-50 transition-colors
+                       border border-blue-200 disabled:opacity-50"
+            title="Enviar recordatorio"
+          >
+            🔔 Recordar
+          </button>
+        )}
+
         {onPrintReceipt && (
           <button
             onClick={() => onPrintReceipt(appointment)}
@@ -92,7 +144,7 @@ const AppointmentCard = ({
                        border border-sana-200"
             title="Imprimir comprobante"
           >
-            🖨️ Comprobante
+            🖨️
           </button>
         )}
 

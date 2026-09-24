@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 
-// Páginas
 import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
 import PatientsPage from '../pages/PatientsPage';
@@ -11,10 +10,12 @@ import DoctorsPage from '../pages/DoctorsPage';
 import SpecialtiesPage from '../pages/SpecialtiesPage';
 import UsersPage from '../pages/UsersPage';
 import AuditPage from '../pages/AuditPage';
-import MessagesPage from '../pages/MessagesPage';   // ← Este faltaba
-import NotFoundPage from '../pages/NotFoundPage';
 import BackupsPage from '../pages/BackupsPage';
 import SettingsPage from '../pages/SettingsPage';
+import MessagesPage from '../pages/MessagesPage';
+import WaitlistPage from '../pages/WaitlistPage';
+import WhatsappTemplatesPage from '../pages/WhatsappTemplatesPage';
+import NotFoundPage from '../pages/NotFoundPage';
 
 const AppRouter = () => {
   return (
@@ -30,6 +31,7 @@ const AppRouter = () => {
           <Route path="/patients/:id" element={<PatientDetailPage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/waitlist" element={<WaitlistPage />} />
 
           {/* Solo Admin */}
           <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
@@ -39,6 +41,7 @@ const AppRouter = () => {
             <Route path="/audit" element={<AuditPage />} />
             <Route path="/backups" element={<BackupsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/whatsapp-templates" element={<WhatsappTemplatesPage />} />
           </Route>
         </Route>
 

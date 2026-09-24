@@ -10,6 +10,7 @@ import { appointmentsApi } from '../api/appointments.api';
 import { patientsApi } from '../api/patients.api';
 import { doctorsApi } from '../api/doctors.api';
 import { specialtiesApi } from '../api/specialties.api';
+import AttendanceStats from '../components/dashboard/AttendanceStats';
 
 const DashboardPage = () => {
   const { user } = useAuth();
@@ -218,8 +219,16 @@ const DashboardPage = () => {
               ))}
             </div>
 
+{/* Estadísticas de asistencia */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+  <AttendanceStats />
+  {/* Podés agregar otro componente al lado después */}
+</div>
+
+
             {/* Grid de gráficos */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              
               {/* Gráfico semanal */}
               <Card className="lg:col-span-2">
                 <div className="flex items-center justify-between mb-6">

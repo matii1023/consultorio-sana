@@ -107,14 +107,19 @@ const PatientForm = ({ initialData = null, onSubmit, onCancel, loading = false }
           onChange={handleChange}
           required
         />
-        <Input
-          label="Teléfono (WhatsApp)"
-          name="phone"
-          value={form.phone}
-          onChange={handleChange}
-          placeholder="+5491123456789"
-          required
-        />
+        <div>
+          <Input
+            label="Teléfono (WhatsApp)"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            placeholder="2634589236"
+            required
+          />
+          <p className="text-xs text-sana-400 -mt-2 mb-4">
+            💡 Podés escribir el número sin el +54 9. El sistema lo completa automáticamente.
+          </p>
+        </div>
       </div>
 
       <Input
@@ -139,7 +144,7 @@ const PatientForm = ({ initialData = null, onSubmit, onCancel, loading = false }
         name="emergency_contact"
         value={form.emergency_contact}
         onChange={handleChange}
-        placeholder="María Pérez +5491123456789"
+        placeholder="María Pérez 2634589236"
       />
 
       {error && (

@@ -1,21 +1,24 @@
 const cron = require('node-cron');
 const pool = require('../config/db');
-const { sendAppointmentReminder } = require('../services/whatsapp.service');
+const {
+  sendAppointmentReminder,
+  sendAppointmentReminder2h,
+} = require('../services/whatsapp.service');
 
 /**
- * Busca todas las citas que ocurrirán mañana en el mismo horario
- * y envía recordatorios de WhatsApp.
+ * Envía recordatorios 24 horas antes de la cita.
  */
-const sendDailyReminders = async () => {
-  console.log('⏰ Ejecutando job de recordatorios...');
+const send24hReminders = async () => {
+  console.log('⏰ [24h] Ejecutando recordatorios...');
 
   try {
-    // Citas que ocurren entre mañana y dentro de 24 horas
     const result = await pool.query(
       `SELECT
-         a.id, a.date_time,
-         p.first_name AS patient_first_name, p.phone AS patient_phone,
-         u.first_name AS doctor_first_name, u.last_name AS doctor_last_name,
+         a.id, a.date_time, a.confirm_token, a.cancel_token,
+         p.first_name AS patient_first_name,
+         p.phone AS patient_phone,
+         u.first_name AS doctor_first_name,
+         u.last_name AS doctor_last_name,
          s.name AS specialty_name
        FROM appointments a
        INNER JOIN patients p ON p.id = a.patient_id
@@ -27,42 +30,124 @@ const sendDailyReminders = async () => {
                              AND NOW() + INTERVAL '25 hours'`
     );
 
-    console.log(`📅 ${result.rows.length} citas para recordar`);
+    console.log(`📅 ${result.rows.length} citas para recordar (24h)`);
 
-    for (const appointment of result.rows) {
-      await sendAppointmentReminder({
+    let sent = 0;
+    let failed = 0;
+
+    for (const appt of result.rows) {
+      if (!appt.patient_phone) {
+        failed++;
+        continue;
+      }
+
+      const sendResult = await sendAppointmentReminder({
+        appointment: appt,
         patient: {
-          first_name: appointment.patient_first_name,
-          phone: appointment.patient_phone,
+          first_name: appt.patient_first_name,
+          phone: appt.patient_phone,
         },
         doctor: {
-          first_name: appointment.doctor_first_name,
-          last_name: appointment.doctor_last_name,
+          first_name: appt.doctor_first_name,
+          last_name: appt.doctor_last_name,
         },
-        specialty: appointment.specialty_name,
-        dateTime: appointment.date_time,
+        specialty: appt.specialty_name,
+        dateTime: appt.date_time,
       });
 
-      // Pequeña pausa para no saturar la API de UltraMsg
+      if (sendResult.success) sent++;
+      else failed++;
+
+      // Pausa de 1.5s entre mensajes
       await new Promise((r) => setTimeout(r, 1500));
     }
 
-    console.log('✅ Recordatorios enviados');
+    console.log(`✅ [24h] Recordatorios: ${sent} enviados, ${failed} fallidos`);
   } catch (error) {
-    console.error('❌ Error en job de recordatorios:', error.message);
+    console.error('❌ Error en recordatorios 24h:', error.message);
   }
 };
 
 /**
- * Inicia todos los cron jobs
+ * Envía recordatorios 2 horas antes de la cita.
+ */
+const send2hReminders = async () => {
+  console.log('⏰ [2h] Ejecutando recordatorios...');
+
+  try {
+    const result = await pool.query(
+      `SELECT
+         a.id, a.date_time,
+         p.first_name AS patient_first_name,
+         p.phone AS patient_phone,
+         u.first_name AS doctor_first_name,
+         u.last_name AS doctor_last_name
+       FROM appointments a
+       INNER JOIN patients p ON p.id = a.patient_id
+       INNER JOIN doctors d ON d.id = a.doctor_id
+       INNER JOIN users u ON u.id = d.user_id
+       WHERE a.status IN ('PENDING', 'CONFIRMED')
+         AND a.date_time BETWEEN NOW() + INTERVAL '1 hour 45 minutes'
+                             AND NOW() + INTERVAL '2 hours 15 minutes'`
+    );
+
+    console.log(`📅 ${result.rows.length} citas para recordar (2h)`);
+
+    let sent = 0;
+    let failed = 0;
+
+    for (const appt of result.rows) {
+      if (!appt.patient_phone) {
+        failed++;
+        continue;
+      }
+
+      const sendResult = await sendAppointmentReminder2h({
+        patient: {
+          first_name: appt.patient_first_name,
+          phone: appt.patient_phone,
+        },
+        doctor: {
+          first_name: appt.doctor_first_name,
+          last_name: appt.doctor_last_name,
+        },
+        dateTime: appt.date_time,
+      });
+
+      if (sendResult.success) sent++;
+      else failed++;
+
+      // Pausa de 1.5s entre mensajes
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+
+    console.log(`✅ [2h] Recordatorios: ${sent} enviados, ${failed} fallidos`);
+  } catch (error) {
+    console.error('❌ Error en recordatorios 2h:', error.message);
+  }
+};
+
+/**
+ * Inicia todos los cron jobs.
  */
 const startJobs = () => {
-  // Todos los días a las 9:00 AM
-  cron.schedule('0 9 * * *', sendDailyReminders, {
+  // Recordatorios 24h antes - todos los días a las 10 AM
+  cron.schedule('0 10 * * *', send24hReminders, {
     timezone: 'America/Argentina/Buenos_Aires',
   });
 
-  console.log('⏰ Cron jobs iniciados');
+  // Recordatorios 2h antes - cada 30 min entre 8 AM y 8 PM
+  cron.schedule('*/30 8-20 * * *', send2hReminders, {
+    timezone: 'America/Argentina/Buenos_Aires',
+  });
+
+  console.log('⏰ Cron jobs programados:');
+  console.log('   - Recordatorios 24h: todos los días a las 10:00 AM');
+  console.log('   - Recordatorios 2h: cada 30 min entre 8 AM y 8 PM');
 };
 
-module.exports = { startJobs, sendDailyReminders };
+module.exports = {
+  startJobs,
+  send24hReminders,
+  send2hReminders,
+};

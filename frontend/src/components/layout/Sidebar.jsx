@@ -20,6 +20,8 @@ const Sidebar = () => {
      { path: '/audit',        label: 'Auditoría',      icon: '📜', roles: ['ADMIN'] },
      { path: '/backups', label: 'Backups', icon: '🛡️', roles: ['ADMIN'] },
      { path: '/settings', label: 'Configuración', icon: '⚙️', roles: ['ADMIN'] },
+     { path: '/waitlist', label: 'Lista de espera', icon: '⏳', roles: ['ADMIN', 'SECRETARY'] },
+     { path: '/whatsapp-templates', label: 'Plantillas WhatsApp', icon: '💬', roles: ['ADMIN', 'SECRETARY'] },
   ];
 
   const allowedItems = navItems.filter((item) => item.roles.includes(user?.role));

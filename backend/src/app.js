@@ -19,8 +19,21 @@ const whatsappTemplatesRoutes = require('./routes/whatsappTemplates.routes');
 
 const app = express();
 
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://consultorio-sana.vercel.app',  // ← Tu URL real de Vercel
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 
 app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
   res.status(204).end();

@@ -3,7 +3,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import Header from '../components/layout/Header';
 import Card from '../components/common/Card';
 import Loader from '../components/common/Loader';
-import { waitlistApi } from '../api/waitlist.api';
+import { waitlistApi } from '../api/waitList.api';
 import { useToast } from '../context/ToastContext';
 
 const WaitlistPage = () => {

@@ -17,7 +17,7 @@ const whatsappRoutes = require('./routes/whatsapp.routes');
 const whatsappTemplatesRoutes = require('./routes/whatsappTemplates.routes');
 const waitlistRoutes = require('./routes/waitlist.routes');
 const publicActionsRoutes = require('./routes/publicActions.routes');
-
+const waitlistRoutes = require('./routes/waitlist.routes');
 const app = express();
 
 // ---- CORS ----

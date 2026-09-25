@@ -14,26 +14,37 @@ const prescriptionsRoutes = require('./routes/prescriptions.routes');
 const backupRoutes = require('./routes/backup.routes');
 const settingsRoutes = require('./routes/settings.routes');
 const whatsappRoutes = require('./routes/whatsapp.routes');
-const waitlistRoutes = require('./routes/waitlist.routes');  
 const whatsappTemplatesRoutes = require('./routes/whatsappTemplates.routes');
+const waitlistRoutes = require('./routes/waitlist.routes');
+const publicActionsRoutes = require('./routes/publicActions.routes');
 
 const app = express();
 
+// ---- CORS ----
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://consultorio-sana.vercel.app',  // ← Tu URL real de Vercel
+  'http://localhost:5174',
+  'https://consultorio-sana-six.vercel.app',
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`⚠️ CORS bloqueado para: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+
+// ---- Middlewares ----
+app.use(express.json({ limit: '10mb' }));
 
 app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
   res.status(204).end();
@@ -43,6 +54,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', service: '+sana backend', timestamp: new Date() });
 });
 
+// ---- Rutas ----
 app.use('/api/auth', authRoutes);
 app.use('/api/specialties', specialtiesRoutes);
 app.use('/api/doctors', doctorsRoutes);
@@ -55,9 +67,11 @@ app.use('/api/prescriptions', prescriptionsRoutes);
 app.use('/api/backups', backupRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
-app.use('/api/waitlist', waitlistRoutes);
 app.use('/api/whatsapp-templates', whatsappTemplatesRoutes);
+app.use('/api/waitlist', waitlistRoutes);
+app.use('/api/public', publicActionsRoutes);
 
+// ---- Error handler ----
 app.use(errorHandler);
 
 module.exports = app;

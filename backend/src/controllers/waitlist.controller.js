@@ -1,7 +1,6 @@
 const pool = require('../config/db');
 const { logAudit } = require('../services/audit.service');
 
-// GET /api/waitlist
 const getAllWaitlist = async (req, res, next) => {
   try {
     const { status = 'WAITING' } = req.query;
@@ -32,7 +31,6 @@ const getAllWaitlist = async (req, res, next) => {
   }
 };
 
-// POST /api/waitlist
 const addToWaitlist = async (req, res, next) => {
   try {
     const {
@@ -71,7 +69,6 @@ const addToWaitlist = async (req, res, next) => {
   }
 };
 
-// PATCH /api/waitlist/:id/status
 const updateWaitlistStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -96,7 +93,6 @@ const updateWaitlistStatus = async (req, res, next) => {
   }
 };
 
-// DELETE /api/waitlist/:id
 const deleteWaitlistEntry = async (req, res, next) => {
   try {
     const { id } = req.params;

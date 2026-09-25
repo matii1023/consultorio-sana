@@ -1,8 +1,5 @@
 const pool = require('../config/db');
 
-/**
- * Reemplaza los placeholders {{var}} por los valores reales.
- */
 const renderTemplate = (template, values) => {
   let output = template;
   Object.entries(values).forEach(([key, value]) => {
@@ -12,9 +9,6 @@ const renderTemplate = (template, values) => {
   return output;
 };
 
-/**
- * Obtiene una plantilla de la BD y la renderiza.
- */
 const getRenderedTemplate = async (templateKey, values) => {
   const result = await pool.query(
     'SELECT body FROM whatsapp_templates WHERE key = $1 AND is_active = TRUE',

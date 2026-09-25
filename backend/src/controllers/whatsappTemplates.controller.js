@@ -1,7 +1,6 @@
 const pool = require('../config/db');
 const { logAudit } = require('../services/audit.service');
 
-// GET /api/whatsapp-templates
 const getAllTemplates = async (req, res, next) => {
   try {
     const result = await pool.query(
@@ -15,12 +14,11 @@ const getAllTemplates = async (req, res, next) => {
   }
 };
 
-// GET /api/whatsapp-templates/:key
 const getTemplateByKey = async (req, res, next) => {
   try {
     const { key } = req.params;
     const result = await pool.query(
-      `SELECT * FROM whatsapp_templates WHERE key = $1`,
+      'SELECT * FROM whatsapp_templates WHERE key = $1',
       [key]
     );
     if (result.rows.length === 0) {
@@ -32,7 +30,6 @@ const getTemplateByKey = async (req, res, next) => {
   }
 };
 
-// PUT /api/whatsapp-templates/:key
 const updateTemplate = async (req, res, next) => {
   try {
     const { key } = req.params;
